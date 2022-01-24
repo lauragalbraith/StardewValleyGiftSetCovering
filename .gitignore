@@ -1,2 +1,5 @@
+# ignore output executables
+*.out
+
 # ignore notes
 *notes.txt
