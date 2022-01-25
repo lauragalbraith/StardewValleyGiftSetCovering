@@ -5,11 +5,27 @@ COMPILER = g++
 WARNINGS_FLAGS = -Wall -Werror -Wextra -pedantic -Wshadow -Wconversion
 ERRORS_FLAGS = -fmax-errors=3
 LEAK_FLAGS = -static-liblsan -fsanitize=leak
+LINK_LIBCURL_FLAGS = -lcurl
 
-all: main.out
+all: determine_gifts.out
+
+determine_gifts.out: curl.out main.out
+	$(COMPILER) -o $@ $^ $(LINK_LIBCURL_FLAGS)
+
+determine_gifts_debug.out: curl_debug.out main_debug.out
+	$(COMPILER) -o $@ $^ $(LINK_LIBCURL_FLAGS)
+
+curl.out: curl.cpp
+	$(COMPILER) $(ERRORS_FLAGS) $(WARNINGS_FLAGS) $(LEAK_FLAGS) -c $^ -o $@ $(LINK_LIBCURL_FLAGS)
+
+curl_debug.out: curl.cpp
+	$(COMPILER) $(WARNINGS_FLAGS) $(LEAK_FLAGS) -c $^ -o $@ $(LINK_LIBCURL_FLAGS)
 
 main.out: main.cpp
-	$(COMPILER) $(ERRORS_FLAGS) $(WARNINGS_FLAGS) $(ERRORS_FLAGS) $^ -o $@
+	$(COMPILER) $(ERRORS_FLAGS) $(WARNINGS_FLAGS) $(LEAK_FLAGS) -c $^ -o $@
+
+main_debug.out: main.cpp
+	$(COMPILER) $(WARNINGS_FLAGS) $(LEAK_FLAGS) -c $^ -o $@
 
 clean:
 	rm -f *.out test*.txt

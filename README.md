@@ -18,3 +18,13 @@ All code is written by the repository owner, Laura Galbraith.
 C++ style guidelines based on https://developers.google.com/edu/c++/getting-started?authuser=0
 
 Version of C++ used: 2014 standard (c++ 14)
+
+## Requirements
+
+This code has only been built and run on an Ubuntu 20.04 environment, and is not officially supported outside of that environment.
+
+### Required packages/programs
+
+- make
+- g++
+- libcurl4-openssl-dev
