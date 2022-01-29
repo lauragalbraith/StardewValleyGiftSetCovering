@@ -28,3 +28,4 @@ This code has only been built and run on an Ubuntu 20.04 environment, and is not
 - make
 - g++
 - libcurl4-openssl-dev
+- libxml2-dev
