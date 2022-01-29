@@ -9,6 +9,7 @@ Determine the fewest number of loved gifts needed for all Stardew Valley village
 Stardew Valley is a terrific video game. In it, you can become friends with various NPC villagers by giving them gifts. Each villager "loves" different items, so the problem to carry the fewest items with you to gift them when you happen to come across each one. This becomes a [set-covering problem](https://en.m.wikipedia.org/wiki/Set_cover_problem).
 
 Home page: https://www.stardewvalley.net/
+
 Wiki: https://stardewvalleywiki.com/Stardew_Valley_Wiki
 
 ## General Info
