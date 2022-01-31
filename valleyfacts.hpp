@@ -6,6 +6,7 @@
 #ifndef SVGSC_VALLEY_FACTS_H
 #define SVGSC_VALLEY_FACTS_H
 
+#include <iostream> // ostream
 #include <string> // string
 #include <vector> // vector
 #include <map> // map
@@ -15,13 +16,46 @@
 typedef std::string Villager;
 typedef std::string Gift;
 
+class GiftForVillagers {
+  public:
+    // Constructors
+    GiftForVillagers(); // necessary for GiftForVillagers to be compatible with BucketQueue
+    GiftForVillagers(const Gift& g, const std::vector<Villager>& vs);
+    GiftForVillagers(const GiftForVillagers& other); // necessary for GiftForVillagers to be compatible with BucketQueue
+
+    // Methods necessary for GiftForVillagers to be compatible with BucketQueue
+    GiftForVillagers& operator=(const GiftForVillagers& other);
+    bool operator<(const GiftForVillagers& other) const;
+    unsigned int Size() const;
+    void AddElements(const GiftForVillagers& other);
+    size_t RemoveElements(const GiftForVillagers& other);
+
+    // Data-reading methods
+    const Gift GetGift() const;
+    const std::vector<Villager> GetVillagers() const;
+
+    // Destructor
+    ~GiftForVillagers();
+
+  private:
+    void copy(const GiftForVillagers& other);
+    void clear();
+
+    Gift gift;
+    std::map<Villager, bool> villagers;
+};
+
+// necessary for GiftForVillagers to be compatible with BucketQueue
+std::ostream& operator<<(std::ostream& os, const GiftForVillagers& x);
+
 class GiftsByVillager {
   public:
     // Constructor
     // will only load giftable villagers not specified in given skip list; likewise with gifts
     GiftsByVillager(const std::vector<Villager>& to_skip_villagers, const std::vector<Gift>& to_skip_gifts);
 
-    // TODO add methods as necessary for interaction with algorithm
+    // return list of all gifts and the villagers associated with them
+    std::vector<GiftForVillagers> GetGiftSets() const;
 
   private:
     const std::vector<Villager> GetVillagers();
@@ -31,7 +65,7 @@ class GiftsByVillager {
     Curl* curl_interface;
     std::vector<Villager> villagers_to_skip;
     std::vector<Gift> gifts_to_skip;
-    std::map<Gift, std::vector<Villager>> loved_gifts_of_villagers; // TODO once algorithm is implemented, consider if this is still the most efficient implementation; maybe map of gifts to maps of villagers (to empty structs)?
+    std::map<Gift, std::vector<Villager>> loved_gifts_of_villagers;
 
     static const std::string VILLAGERS_URL;
     static const std::vector<std::string> VILLAGERS_CONTAINING_ELEMENTS;

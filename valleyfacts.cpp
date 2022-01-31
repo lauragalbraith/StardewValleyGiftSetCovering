@@ -5,6 +5,7 @@
 
 #include "valleyfacts.hpp" // self-include header
 
+#include <iostream> // ostream
 #include <string> // string
 #include <vector> // vector
 #include <map> // map
@@ -14,7 +15,139 @@
 #include "curl.hpp" // Curl, CurlResult
 #include "xmlparse.hpp" // GetPrecededAndNestedData, XMLParseResult
 
-// Constants
+GiftForVillagers::GiftForVillagers() {
+  this->gift = "";
+}
+
+GiftForVillagers::GiftForVillagers(const Gift& g, const std::vector<Villager>& vs)
+  : gift(g)
+{
+  for (auto v:vs) {
+    this->villagers[v] = true; // the 'true' value does not affect the algorithm
+  }
+}
+
+GiftForVillagers::GiftForVillagers(const GiftForVillagers& other) {
+  this->copy(other);
+}
+
+GiftForVillagers& GiftForVillagers::operator=(const GiftForVillagers& other) {
+  if (&other != this) {
+    this->clear();
+    this->copy(other);
+  }
+  return *this;
+}
+
+bool GiftForVillagers::operator<(const GiftForVillagers& other) const {
+  if (this->gift < other.gift) {
+    return true;
+  }
+  else if (this->gift == other.gift) {
+    if (this->villagers.size() < other.villagers.size()) {
+      return true;
+    }
+    else if (this->villagers.size() == other.villagers.size()) {
+      auto this_it = this->villagers.cbegin();
+      auto other_it = other.villagers.cbegin();
+      while (this_it != this->villagers.end() && other_it != other.villagers.cend()) {
+        if (this_it->first == other_it->first) {
+          ++this_it;
+          ++other_it;
+          continue; // see if there's a significant difference in the next element
+        }
+
+        // otherwise there is a significant difference between the elements, which determines the ordering
+        return this_it->first < other_it->first;
+      }
+    }
+  }
+
+  return false;
+}
+
+// O(1)
+unsigned int GiftForVillagers::Size() const {
+  return static_cast<unsigned int>(this->villagers.size());
+}
+
+// "elements" for this class are villagers
+// O(number of elements of 'other')
+void GiftForVillagers::AddElements(const GiftForVillagers& other) {
+  for (auto v:other.villagers) {
+    this->villagers[v.first] = true; // the 'true' value does not affect the algorithm
+  }
+}
+
+// "elements" for this class are villagers
+// O(number of elements of 'other')
+size_t GiftForVillagers::RemoveElements(const GiftForVillagers& other) {
+  size_t villagers_removed = 0;
+  for (auto v:other.villagers) {
+    if (this->villagers.find(v.first) != this->villagers.end()) {
+      this->villagers.erase(v.first);
+      ++villagers_removed;
+    }
+  }
+
+  return villagers_removed;
+}
+
+const Gift GiftForVillagers::GetGift() const {
+  return this->gift;
+}
+
+const std::vector<Villager> GiftForVillagers::GetVillagers() const {
+  std::vector<Villager> ret;
+  ret.resize(this->villagers.size());
+
+  int i = 0;
+  for (auto v:this->villagers) {
+    ret[i] = v.first;
+    ++i;
+  }
+
+  return ret;
+}
+
+GiftForVillagers::~GiftForVillagers() {
+  this->clear();
+}
+
+void GiftForVillagers::copy(const GiftForVillagers& other) {
+  // copy gift
+  this->gift = other.gift;
+
+  // copy villagers
+  for (auto v:other.villagers) {
+    this->villagers[v.first] = v.second;
+  }
+}
+
+void GiftForVillagers::clear() {
+  this->gift = "";
+  this->villagers.clear();
+}
+
+std::ostream& operator<<(std::ostream& os, const GiftForVillagers& x) {
+  // print gift
+  os << x.GetGift();
+
+  // print villagers
+  os << " for {";
+  const std::vector<Villager> vs = x.GetVillagers();
+  for (std::vector<Villager>::size_type villager_i = 0; villager_i < vs.size(); ++villager_i) {
+    os << vs[villager_i];
+    if (villager_i != vs.size()-1) {
+      os << ", ";
+    }
+  }
+  os << "}";
+
+  return os;
+}
+
+// Constants for wiki usage
 const std::string GiftsByVillager::VILLAGERS_URL = "https://stardewvalleywiki.com/Villagers";
 // though there is also a containing div tag, the code cannot currently distinguish between other div tags starting/ending inside of li
 const std::vector<std::string> GiftsByVillager::VILLAGERS_CONTAINING_ELEMENTS = {"ul", "li", "p", "a"};
@@ -87,6 +220,19 @@ GiftsByVillager::GiftsByVillager(const std::vector<Villager>& to_skip_villagers,
   // close down curl memory
   delete this->curl_interface;
   this->curl_interface = NULL;
+}
+
+std::vector<GiftForVillagers> GiftsByVillager::GetGiftSets() const {
+  std::vector<GiftForVillagers> ret;
+  ret.resize(this->loved_gifts_of_villagers.size());
+
+  int i = 0;
+  for (auto g_v:this->loved_gifts_of_villagers) {
+    ret[i] = GiftForVillagers(g_v.first, g_v.second);
+    ++i;
+  }
+
+  return ret;
 }
 
 // Get list of villagers from wiki, minus any we want to skip
