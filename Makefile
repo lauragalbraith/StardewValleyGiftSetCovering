@@ -10,10 +10,10 @@ LINK_XML_FLAGS = -I/usr/include/libxml2 -lxml2
 
 all: determine_gifts.out
 
-determine_gifts.out: curl.out xmlparse.out valleyfacts.out main.out
+determine_gifts.out: curl.out xmlparse.out valleyfacts.out bucketqueue.out main.out
 	$(COMPILER) -o $@ $^ $(LINK_LIBCURL_FLAGS) $(LINK_XML_FLAGS)
 
-determine_gifts_debug.out: curl_debug.out xmlparse_debug.out valleyfacts_debug.out main_debug.out
+determine_gifts_debug.out: curl_debug.out xmlparse_debug.out valleyfacts_debug.out bucketqueue_debug.out main_debug.out
 	$(COMPILER) -o $@ $^ $(LINK_LIBCURL_FLAGS) $(LINK_XML_FLAGS)
 
 curl.out: curl.cpp
@@ -32,6 +32,12 @@ valleyfacts.out: valleyfacts.cpp
 	$(COMPILER) $(ERRORS_FLAGS) $(WARNINGS_FLAGS) -c $^ -o $@
 
 valleyfacts_debug.out: valleyfacts.cpp
+	$(COMPILER) $(WARNINGS_FLAGS) $(LEAK_FLAGS) -c $^ -o $@
+
+bucketqueue.out: bucketqueue.cpp
+	$(COMPILER) $(ERRORS_FLAGS) $(WARNINGS_FLAGS) -c $^ -o $@
+
+bucketqueue_debug.out: bucketqueue.cpp
 	$(COMPILER) $(WARNINGS_FLAGS) $(LEAK_FLAGS) -c $^ -o $@
 
 main.out: main.cpp
