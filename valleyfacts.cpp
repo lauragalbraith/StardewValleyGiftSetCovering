@@ -129,12 +129,17 @@ void GiftForVillagers::clear() {
   this->villagers.clear();
 }
 
+// ex. "4 Prismatic Shards, for Pierre, Lewis, Penny, Marnie"
 std::ostream& operator<<(std::ostream& os, const GiftForVillagers& x) {
   // print gift
-  os << x.GetGift();
+  os << x.Size() << " " << x.GetGift();
+  if (x.Size() > 1) {
+    os << "s";
+  }
+
+  os << " for ";
 
   // print villagers
-  os << " for {";
   const std::vector<Villager> vs = x.GetVillagers();
   for (std::vector<Villager>::size_type villager_i = 0; villager_i < vs.size(); ++villager_i) {
     os << vs[villager_i];
@@ -142,7 +147,10 @@ std::ostream& operator<<(std::ostream& os, const GiftForVillagers& x) {
       os << ", ";
     }
   }
-  os << "}";
+
+  if (vs.size() == 0) {
+    os << "no one";
+  }
 
   return os;
 }
@@ -175,11 +183,11 @@ GiftsByVillager::GiftsByVillager(const std::vector<Villager>& to_skip_villagers,
   }
 
   // Combine Villager/Gift data
-  const std::vector<Villager> villagers = this->GetVillagers();
+  const std::vector<Villager> villagers = this->PopulateVillagersFromWiki();
 
   // get gifts that are specifically loved by each villager
   for (auto v:villagers) {
-    std::vector<Gift> loved_gifts = this->GetLovedGiftsOfVillager(v);
+    std::vector<Gift> loved_gifts = this->PopulateLovedGiftsOfVillagerFromWiki(v);
     for (auto g:loved_gifts) {
       // a mapping of all loved Gifts to the Villagers that love them
       if (this->loved_gifts_of_villagers.find(g) == this->loved_gifts_of_villagers.end()) {
@@ -235,9 +243,31 @@ std::vector<GiftForVillagers> GiftsByVillager::GetGiftSets() const {
   return ret;
 }
 
-// Get list of villagers from wiki, minus any we want to skip
-// TODO incorporate villagers_to_skip once main.cpp takes user input
+// Get list of villagers stored
 const std::vector<Villager> GiftsByVillager::GetVillagers() {
+  // de-duplicate villagers
+  std::map<Villager, bool> v_map;
+  for (auto g_v:this->loved_gifts_of_villagers) {
+    for (auto v:g_v.second) {
+      v_map[v] = true;
+    }
+  }
+
+  // turn into list
+  std::vector<Villager> ret;
+  ret.resize(v_map.size());
+  int i = 0;
+  for (auto v:v_map) {
+    ret[i] = v.first;
+    ++i;
+  }
+
+  return ret;
+}
+
+// Get list of villagers from wiki, minus any we want to skip
+// TODO NEXT 50 incorporate villagers_to_skip once main.cpp takes user input
+const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
   std::vector<Villager> villagers;
 
   // Make call to wiki
@@ -281,7 +311,7 @@ const std::vector<Villager> GiftsByVillager::GetVillagers() {
 
 // returns a mapping of all loved Gifts of the specified Villager
 // TODO incorporate gifts_to_skip once main.cpp takes user input
-const std::vector<Gift> GiftsByVillager::GetLovedGiftsOfVillager(const Villager& villager) {
+const std::vector<Gift> GiftsByVillager::PopulateLovedGiftsOfVillagerFromWiki(const Villager& villager) {
   std::stringstream villager_url;
   villager_url << GiftsByVillager::VILLAGER_URL_PREFIX << villager;
 

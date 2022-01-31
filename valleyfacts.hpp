@@ -57,9 +57,11 @@ class GiftsByVillager {
     // return list of all gifts and the villagers associated with them
     std::vector<GiftForVillagers> GetGiftSets() const;
 
-  private:
     const std::vector<Villager> GetVillagers();
-    const std::vector<Gift> GetLovedGiftsOfVillager(const Villager& villager);
+
+  private:
+    const std::vector<Villager> PopulateVillagersFromWiki();
+    const std::vector<Gift> PopulateLovedGiftsOfVillagerFromWiki(const Villager& villager);
     const std::map<Gift, std::vector<Villager>> GetUniversalLovedGiftExceptions();
 
     Curl* curl_interface;

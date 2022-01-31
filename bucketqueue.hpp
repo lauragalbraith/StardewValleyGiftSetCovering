@@ -26,6 +26,9 @@ class BucketQueue {
     void DeleteHighestPrioritySet();
     void DecreasePriorityOfSet(T set, unsigned int old_priority, unsigned int new_priority);
 
+    // Additional helpful methods
+    const T GetCoveredElements() const;
+
   private:
     std::pair<int, T> GetHighestPriorityPosition() const;
     void DeleteSet(T set, unsigned int priority);
@@ -140,6 +143,12 @@ void BucketQueue<T>::DecreasePriorityOfSet(T set, unsigned int old_priority, uns
 
   // re-add it to buckets at its new priority
   this->InsertSet(set);
+}
+
+// O(1)
+template <class T>
+const T BucketQueue<T>::GetCoveredElements() const {
+  return this->covered_set;
 }
 
 // Return the vector position inside buckets where highest priority can be found, and the chosen element therein
