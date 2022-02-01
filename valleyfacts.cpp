@@ -129,10 +129,10 @@ void GiftForVillagers::clear() {
   this->villagers.clear();
 }
 
-// ex. "4 Prismatic Shards, for Pierre, Lewis, Penny, Marnie"
+// ex. "4 Prismatic Shard items for Pierre, Lewis, Penny, Marnie"
 std::ostream& operator<<(std::ostream& os, const GiftForVillagers& x) {
   // print gift
-  os << x.Size() << " " << x.GetGift();
+  os << x.Size() << " " << x.GetGift() << " item";
   if (x.Size() > 1) {
     os << "s";
   }
@@ -172,14 +172,13 @@ GiftsByVillager::GiftsByVillager(const std::vector<Villager>& to_skip_villagers,
   this->curl_interface = new Curl();
 
   // Initialize internal storage of the parameters
-  this->villagers_to_skip.resize(to_skip_villagers.size());
-  for (size_t i = 0; i < to_skip_villagers.size(); ++i) {
-    this->villagers_to_skip[i] = to_skip_villagers[i];
+  // (the bool value in the maps will represent whether they have been seen from the wiki or not)
+  for (auto v:to_skip_villagers) {
+    this->villagers_to_skip[v] = false;
   }
 
-  this->gifts_to_skip.resize(to_skip_gifts.size());
-  for (size_t i = 0; i < to_skip_gifts.size(); ++i) {
-    this->gifts_to_skip[i] = to_skip_gifts[i];
+  for (auto g:to_skip_gifts) {
+    this->gifts_to_skip[g] = false;
   }
 
   // Combine Villager/Gift data
@@ -266,7 +265,6 @@ const std::vector<Villager> GiftsByVillager::GetVillagers() {
 }
 
 // Get list of villagers from wiki, minus any we want to skip
-// TODO NEXT 50 incorporate villagers_to_skip once main.cpp takes user input
 const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
   std::vector<Villager> villagers;
 
@@ -283,6 +281,12 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
   }
 
   for (auto v:bachelor_xml.data) {
+    // add the villager to the total list if they aren't being skipped
+    if (this->villagers_to_skip.find(v) != this->villagers_to_skip.end()) {
+      this->villagers_to_skip[v] = true; // mark seen while parsing wiki
+      continue;
+    }
+
     villagers.push_back(v);
   }
 
@@ -293,6 +297,12 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
   }
 
   for (auto v:bachelorette_xml.data) {
+    // add the villager to the total list if they aren't being skipped
+    if (this->villagers_to_skip.find(v) != this->villagers_to_skip.end()) {
+      this->villagers_to_skip[v] = true; // mark seen while parsing wiki
+      continue;
+    }
+
     villagers.push_back(v);
   }
 
@@ -303,6 +313,12 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
   }
 
   for (auto v:nonmarriage_xml.data) {
+    // add the villager to the total list if they aren't being skipped
+    if (this->villagers_to_skip.find(v) != this->villagers_to_skip.end()) {
+      this->villagers_to_skip[v] = true; // mark seen while parsing wiki
+      continue;
+    }
+
     villagers.push_back(v);
   }
 
@@ -310,7 +326,6 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
 }
 
 // returns a mapping of all loved Gifts of the specified Villager
-// TODO incorporate gifts_to_skip once main.cpp takes user input
 const std::vector<Gift> GiftsByVillager::PopulateLovedGiftsOfVillagerFromWiki(const Villager& villager) {
   std::stringstream villager_url;
   villager_url << GiftsByVillager::VILLAGER_URL_PREFIX << villager;
@@ -326,11 +341,21 @@ const std::vector<Gift> GiftsByVillager::PopulateLovedGiftsOfVillagerFromWiki(co
     throw std::runtime_error("failed to parse gifts from " + villager + "'s page: " + loved_gifts_xml.error);
   }
 
-  return loved_gifts_xml.data;
+  std::vector<Gift> acceptable_gifts;
+  for (auto g:loved_gifts_xml.data) {
+    // add the gift to the total list if it isn't being skipped
+    if (this->gifts_to_skip.find(g) != this->gifts_to_skip.end()) {
+      this->gifts_to_skip[g] = true; // mark seen while parsing wiki
+      continue;
+    }
+
+    acceptable_gifts.push_back(g);
+  }
+
+  return acceptable_gifts;
 }
 
 // returns a map of gifts mapped to any villagers that do not love them
-// TODO incorporate villagers_to_skip, gifts_to_skip once main.cpp takes user input
 const std::map<Gift, std::vector<Villager>> GiftsByVillager::GetUniversalLovedGiftExceptions() {
   // Get page data on (almost) universally-loved gifts
   CurlResult friendship_page = this->curl_interface->CallURL(GiftsByVillager::FRIENDSHIP_URL.c_str());
@@ -355,8 +380,20 @@ const std::map<Gift, std::vector<Villager>> GiftsByVillager::GetUniversalLovedGi
   // combine that data to return
   std::map<Gift, std::vector<Villager>> exceptional_universal_gifts;
   for (auto g:universal_loves_xml.data) {
+    // process the gift if it isn't being skipped
+    if (this->gifts_to_skip.find(g) != this->gifts_to_skip.end()) {
+      this->gifts_to_skip[g] = true; // mark seen while parsing wiki
+      continue;
+    }
+
     std::vector<Villager> unloving_villagers;
     for (size_t exception_i = 1; exception_i < exceptions_xml.data.size(); exception_i += 2) {
+      // process the exceptional villager if they aren't being skipped
+      if (this->villagers_to_skip.find(exceptions_xml.data[exception_i-1]) != this->villagers_to_skip.end()) {
+        this->villagers_to_skip[exceptions_xml.data[exception_i-1]] = true; // make seen while parsing wiki
+        continue;
+      }
+
       if (exceptions_xml.data[exception_i] == g) {
         unloving_villagers.push_back(exceptions_xml.data[exception_i-1]);
       }

@@ -65,8 +65,8 @@ class GiftsByVillager {
     const std::map<Gift, std::vector<Villager>> GetUniversalLovedGiftExceptions();
 
     Curl* curl_interface;
-    std::vector<Villager> villagers_to_skip;
-    std::vector<Gift> gifts_to_skip;
+    std::map<Villager,bool> villagers_to_skip;
+    std::map<Gift,bool> gifts_to_skip;
     std::map<Gift, std::vector<Villager>> loved_gifts_of_villagers;
 
     static const std::string VILLAGERS_URL;
