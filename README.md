@@ -18,6 +18,32 @@ C++ style guidelines based on https://developers.google.com/edu/c++/getting-star
 
 Version of C++ used: 2014 standard (c++ 14)
 
+## Example output
+
+```
+$ ./determine_gifts.out \
+    --skip-villagers "Abigail,Wizard" \
+    --missing-gifts "Golden Pumpkin,Prismatic Shard,Pearl,Magic Rock Candy,Rabbit's Foot"
+
+Gifts needed to give all villagers a Loved gift:
+    8 Diamond items for Evelyn, Gus, Jodi, Krobus, Marnie, Maru, Penny, Willy
+    3 Amethyst items for Clint, Dwarf, Emily
+    3 Cactus Fruit items for Linus, Pam, Sam
+    3 Pink Cake items for Haley, Jas, Vincent
+    2 Duck Feather items for Elliott, Leo
+    2 Goat Cheese items for Leah, Robin
+    2 Green Tea items for Caroline, Lewis
+    1 Bean Hotpot item for Demetrius
+    1 Beer item for Shane
+    1 Coffee item for Harvey
+    1 Complete Breakfast item for Alex
+    1 Crocus item for Sandy
+    1 Fiddlehead Risotto item for Kent
+    1 Fried Calamari item for Pierre
+    1 Fried Mushroom item for George
+    1 Frozen Tear item for Sebastian
+```
+
 ## Requirements
 
 This code has only been built and run on an Ubuntu 20.04 environment, and is not officially supported outside of that environment.
