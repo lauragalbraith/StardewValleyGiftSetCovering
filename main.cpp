@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
   BucketQueue<GiftForVillagers> bucket_queue = BucketQueue<GiftForVillagers>(gifts_for_villagers);
 
   // Perform set-covering: https://en.m.wikipedia.org/wiki/Set_cover_problem#Greedy_algorithm
-  std::cout << "Gifts needed to give all villagers a Loved gift:" << std::endl;
+  std::vector<GiftForVillagers> loved_gifts;
   unsigned int coverable_villagers = 1;
   do {
     GiftForVillagers next_gift = bucket_queue.GetHighestPrioritySet();
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
 
     coverable_villagers = next_gift.Size();
     if (coverable_villagers > 0) {
-      std::cout << "    " << next_gift << std::endl;
+      loved_gifts.push_back(next_gift);
     }
   } while (coverable_villagers > 0);
 
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
   const GiftForVillagers covered_villagers = bucket_queue.GetCoveredElements();
   if (covered_villagers.Size() != gifts_and_villagers.GetVillagers().size()) {
     // tell the user that the set-covering algorithm could not complete
-    std::cout << std::endl << "Not all villagers can receive a 'loved' gift with the provided input; these villagers could receive a 'liked' gift instead: ";
+    std::cout << "Not all villagers can receive a 'loved' gift with the provided input; these villagers could receive a 'liked' gift instead: ";
 
     // print what villagers remain uncovered
     GiftForVillagers all_villagers = GiftForVillagers("", gifts_and_villagers.GetVillagers());
@@ -173,6 +173,16 @@ int main(int argc, char *argv[]) {
     }
     std::cout << std::endl;
   }
+
+  // Display the optimal total of gifts
+  std::cout << std::endl << "Gifts needed to give ";
+  std::cout << (covered_villagers.Size() != gifts_and_villagers.GetVillagers().size() ? "all possible" : "all");
+  std::cout << " villagers a 'loved' gift:" << std::endl;
+
+  for (auto g:loved_gifts) {
+    std::cout << "    " << g << std::endl;
+  }
+  std::cout << std::endl;
 
   return 0;
 }
