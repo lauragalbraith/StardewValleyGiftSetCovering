@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
   if (covered_villagers.Size() != gifts_and_villagers.GetVillagers().size()) {
     // tell the user that the set-covering algorithm could not complete
     std::cout << std::endl << "Not all villagers can receive a Loved gift with the provided input; these villagers still need a gift: ";
-    // TODO NEXT handle this case; test with Pierre; consider printing out something more exact (that they will need a Liked Gift? that is a whole additional idea for this repo)
+    // TODO NEXT consider printing out something more exact (that they will need a Liked Gift? that is a whole additional idea for this repo)
 
     // print what villagers remain uncovered
     GiftForVillagers all_villagers = GiftForVillagers("", gifts_and_villagers.GetVillagers());

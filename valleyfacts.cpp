@@ -182,10 +182,10 @@ GiftsByVillager::GiftsByVillager(const std::vector<Villager>& to_skip_villagers,
   }
 
   // Combine Villager/Gift data
-  const std::vector<Villager> villagers = this->PopulateVillagersFromWiki();
+  this->PopulateVillagersFromWiki();
 
   // get gifts that are specifically loved by each villager
-  for (auto v:villagers) {
+  for (auto v:this->non_skipped_villagers) {
     std::vector<Gift> loved_gifts = this->PopulateLovedGiftsOfVillagerFromWiki(v);
     for (auto g:loved_gifts) {
       // a mapping of all loved Gifts to the Villagers that love them
@@ -201,12 +201,12 @@ GiftsByVillager::GiftsByVillager(const std::vector<Villager>& to_skip_villagers,
   std::map<Gift, std::vector<Villager>> universally_loved_gifts_exceptions = this->GetUniversalLovedGiftExceptions();
   for (auto g_v:universally_loved_gifts_exceptions) {
     if (g_v.second.size() <= 0) {
-      this->loved_gifts_of_villagers[g_v.first] = villagers;
+      this->loved_gifts_of_villagers[g_v.first] = this->non_skipped_villagers;
     }
     else {
       std::vector<Villager> loving_villagers;
 
-      for (auto v:villagers) {
+      for (auto v:this->non_skipped_villagers) {
         bool villager_loves_this = true;
         for (auto excepting_v:g_v.second) {
           if (excepting_v == v) {
@@ -244,29 +244,12 @@ std::vector<GiftForVillagers> GiftsByVillager::GetGiftSets() const {
 
 // Get list of villagers stored
 const std::vector<Villager> GiftsByVillager::GetVillagers() {
-  // de-duplicate villagers
-  std::map<Villager, bool> v_map;
-  for (auto g_v:this->loved_gifts_of_villagers) {
-    for (auto v:g_v.second) {
-      v_map[v] = true;
-    }
-  }
-
-  // turn into list
-  std::vector<Villager> ret;
-  ret.resize(v_map.size());
-  int i = 0;
-  for (auto v:v_map) {
-    ret[i] = v.first;
-    ++i;
-  }
-
-  return ret;
+  return this->non_skipped_villagers;
 }
 
 // Get list of villagers from wiki, minus any we want to skip
-const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
-  std::vector<Villager> villagers;
+void GiftsByVillager::PopulateVillagersFromWiki() {
+  this->non_skipped_villagers.resize(0);
 
   // Make call to wiki
   CurlResult villagers_page = this->curl_interface->CallURL(GiftsByVillager::VILLAGERS_URL.c_str());
@@ -287,7 +270,7 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
       continue;
     }
 
-    villagers.push_back(v);
+    this->non_skipped_villagers.push_back(v);
   }
 
   // parse female marriage candidates
@@ -303,7 +286,7 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
       continue;
     }
 
-    villagers.push_back(v);
+    this->non_skipped_villagers.push_back(v);
   }
 
   // parse non-marriage-candidate (but giftable) villagers
@@ -319,10 +302,8 @@ const std::vector<Villager> GiftsByVillager::PopulateVillagersFromWiki() {
       continue;
     }
 
-    villagers.push_back(v);
+    this->non_skipped_villagers.push_back(v);
   }
-
-  return villagers;
 }
 
 // returns a mapping of all loved Gifts of the specified Villager

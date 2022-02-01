@@ -60,13 +60,15 @@ class GiftsByVillager {
     const std::vector<Villager> GetVillagers();
 
   private:
-    const std::vector<Villager> PopulateVillagersFromWiki();
+    void PopulateVillagersFromWiki();
     const std::vector<Gift> PopulateLovedGiftsOfVillagerFromWiki(const Villager& villager);
     const std::map<Gift, std::vector<Villager>> GetUniversalLovedGiftExceptions();
 
     Curl* curl_interface;
     std::map<Villager,bool> villagers_to_skip;
     std::map<Gift,bool> gifts_to_skip;
+
+    std::vector<Villager> non_skipped_villagers;
     std::map<Gift, std::vector<Villager>> loved_gifts_of_villagers;
 
     static const std::string VILLAGERS_URL;
