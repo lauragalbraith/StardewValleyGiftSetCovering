@@ -67,6 +67,7 @@ bool GiftForVillagers::operator<(const GiftForVillagers& other) const {
 }
 
 // O(1)
+// TODO consider: return the smaller of the two (num possible villagers satisfied, num items in inventory) for Size() to support user providing a limit of how many of an item they are willing to gift; perhaps could combine with a favorable implementation of operator< to prioritize taking sets that have an infinite supply
 unsigned int GiftForVillagers::Size() const {
   return static_cast<unsigned int>(this->villagers.size());
 }
